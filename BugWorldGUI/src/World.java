@@ -9,55 +9,73 @@ public class World {
 	public int width;
 	public int height;
 	
-	private List<Bug> bugList = new ArrayList<Bug>();
-	private List<Plant> plantList = new ArrayList<Plant>();
-	
-	//maybe a hash map, coord key and value is bug or plant?
+	/* Very important Lists. */
+	private List<Bug> bugList = new ArrayList<Bug>(); // Hold bugs in the world
+	private List<Plant> plantList = new ArrayList<Plant>(); // Hold plants in the world
 	
 	public World(int width, int height) {
 		this.width = width;
 		this.height = height;
-		/* quick method to create and add bugs to bugList
-		 * int 20 is number of bugs to create. */
-		this.addBugs(10); 
-		this.addPlants(4);
 	}
 	
-	private void addBugs(int n) {
-		/* create n amount of Bugs with random x and y coordinates.
-		 * currently only bug is butterfly only diet option is Plant. */
-		while (bugList.size() < n) { 
-			double x = getRandXY("x");
-			double y = getRandXY("y");
-			
-			//newBug(species, diet, x, y, speed, sightRange)
-			Bug b = new Bug("Butterfly", "Plant", x, y, 1.5, 75);
-			// add new bug to List. Key = String "x,y", Bug b
-			bugList.add(b); 
-		}
+	/* Used with stop button.
+	 * Clear all Bug & Plants from Lists. */
+	public void resetWorld() {
+		bugList.clear();
+		plantList.clear();
 	}
 	
-	private void addPlants(int n) {
+	public List<Bug> addBugs(String type, int n) {
+		/* create n amount of Bugs with random x and y coordinates.
+		 * currently only bug is Butterfly. */
+		List<Bug> newBugs = new ArrayList<Bug>();
+		while (newBugs.size() < n) { 
+			double x = getRandXY("x");
+			while (x < 40 || x > width-40) {
+				x = getRandXY("x");
+			}
+			double y = getRandXY("y");
+			while (y < 40 || y > width-40) {
+				y = getRandXY("y");
+			}
+			//type determines type of Bug and add new bug to List newList
+			if (type.equals("Butterfly")) newBugs.add(new Butterfly(x, y));
+			if (type.equals("Caterpillar")) newBugs.add(new Caterpillar(x, y));
+			if (type.equals("Wasp")) newBugs.add(new Wasp(x, y));
+		}
+		bugList.addAll(newBugs); // Update main bugList with new Bugs.
+		return newBugs; 
+	}
+	
+	public List<Plant> addPlants(String type, int n) {
 		/* create n amount of Bugs with random x and y coordinates.
 		 * currently only bug is butterfly only diet option is Plant. */
-		while (plantList.size() < n) { 
+		List<Plant> newPlants = new ArrayList<Plant>();
+		while (newPlants.size() < n) { 
 			double x = getRandXY("x");
+			while (x < 40 || x > width-40) {
+				x = getRandXY("x");
+			}
 			double y = getRandXY("y");
-			
-			//newBug(species, diet, x, y, speed, sightRange)
-			Plant p = new Plant(x, y);
-			// add new bug to List. Key = String "x,y", Bug b
-			plantList.add(p); 
+			while (y < 40 || y > width-40) {
+				y = getRandXY("y");
+			}
+			//type determines type of Bug and add new bug to List newList
+			if (type.equals("Shrub")) newPlants.add(new Shrub(x, y));
+			if (type.equals("Flower")) newPlants.add(new Flower(x, y));
 		}
+		plantList.addAll(newPlants); // Update main plantList with new Plants.
+		return newPlants;
 	}
 	
 	private double getRandXY(String XY) {
+		// Returns a random x or y used for creating Bugs and Plants
 		if (XY.equals("x")) {
-			double randomX = Math.floor(Math.random() * this.width);
+			double randomX = Math.floor(Math.random() * this.width-40);
 			return randomX;
 		}
 		else { // if XY = "y".
-			double randomY = Math.floor(Math.random() * this.height);
+			double randomY = Math.floor(Math.random() * this.height-40);
 			return randomY;
 		}
 	}

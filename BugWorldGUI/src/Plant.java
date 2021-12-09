@@ -5,33 +5,34 @@ import javafx.scene.image.ImageView;
 
 public class Plant {
 
-	private double x = 0, y = 0;
-	private int size = 50;
+	protected String type;
+	protected double x, y;
+	protected double size;
 	ImageView plantImage;
-//	private double bugImageSize = 40; // I made the image 40x40 
 	
 	
-	public Plant(double x, double y) {
+	public Plant(String type, double x, double y, double size) {
+		this.type = type;
 		this.x = x;
 		this.y = y;
+		this.size = size;
 		this.setPlantImage();
 	}
 	
-	public void setPlantImage() { 
-		/* I currently only have 1 bug, 
-		* derived classes will override this method. */
-		String imageUrl = "/images/Shrub1.png";
-		Image image = new Image(imageUrl);
-		this.plantImage = new ImageView(image);
-		// update to get size and update size later in life
+	protected void setPlantImage() { 
+		/* Derived classes must include override for this method. 
+		 * This method is used to set ImageView plantImage.
+		 * Images are in images package.
+		 * ImageView is used in timeline to display Plants.*/
 	}
 	
-	public void eatPlant(List<Plant> plantList) {
-		this.size -= 5;
+	public boolean eatPlant() {
+		/* Currently only Shrub overrides this so always check Plant type before calling. */
+		return false;
 	}
 	
 	public void growPlant() {
-		if (size < 50) this.size += 1;
+		/* Currently only Shrub overrides this so always check Plant type before calling. */
 	}
 	
 	public ImageView getPlantImage() {
@@ -54,13 +55,20 @@ public class Plant {
 		this.y = y;
 	}
 	
-	public int getSize() {
+	public double getSize() {
 		return size;
 	}
 	
 	public void setSize(int size) {
 		this.size = size;
 	}
-	
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}	
 	
 }

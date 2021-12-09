@@ -6,121 +6,53 @@ import javafx.scene.image.Image;
 
 public class Bug {
 	
-	private double x, y, dx, dy;
-	private double sightRange;
-	private double hunger = 300;
-	protected String species, diet;
-	public ImageView bugImage;
-	private double bugImageSize = 20; // I made the image 20x20 
-	
-	// World = world;
+	protected double x, y, dx, dy; // values used to determine a Bugs position on the map and move Bug.
+	protected double sightRange; // How for from x and y a Bug and see
+	protected double hunger; // Represents how full a bug is, decreases every turn and increases if bug 'eats'
+	protected double hungerMax; // Max hunger level to determine if Bug has Max hunger
+	protected int age = 0; // counter to track Bug age. Current max age for Bugs is 2500 defined in refreshWorldList in GUI
+	protected String species, diet; // Holds species of Bug (derived classes name) and diet (Plant or another Bug species).
+	protected Image open, closed; // 2 images for Bug to use in moving animation
+	public ImageView bugImage; // actual ImageView of Bug on map
+	protected int imageRefresh = 0; // a counter for refreshing a Bugs image
+	protected double bugImageSize = 20; // I made all Bug images 20x20 
+	protected boolean isEating = false; // Used in moving algorithms is true if Bug 'ate' last turn.
 	
 	public Bug(String species, String diet, 
-			double x, double y, double speed, double sightRange) {
+			double x, double y, double speed, double hungerMax, double sightRange) {
 		this.species = species;
 		this.diet = diet;
 		this.x = x;
 		this.y = y;
 		this.dx = speed;
 		this.dy = speed;
+		this.hunger = hungerMax;
+		this.hungerMax = hungerMax;
 		this.sightRange = sightRange;
-		this.setBugImage(); // set image for the bug
-		
+		setBugImage(); // set image for the bug
 	}
 	
-	public void setBugImage() { 
-		/* I currently only have 1 bug, 
-		* derived classes will override this method. */
-		String imageUrl = "/images/butterfly lol.png";
-		Image image = new Image(imageUrl);
-		this.bugImage = new ImageView(image);
-		// update to get size and update size later in life
+	
+	protected void setBugImage() { 
+		/* Derived classes must include override for this method. 
+		 * This method is used to set image open, closed and ImageView bugImage.
+		 * Images are in images package.
+		 * open and closed are 2 different states for images so movement animation.
+		 * ImageView is used in timeline to display Bugs.*/
 	}
+	
+	
+	protected void updateBugImage() {
+		/* Derived classes must include override for this method.
+		 * This method updates ImageView bugImage after int imageRefresh hits certain threshold. */
+	}
+	
+
 	
 	public void getDestination(List<Bug> bugList, List<Plant> plantList, double width, double height) {
-		this.hunger -= 1;
-		if (hunger < 250 && this.foodNear(plantList)) { // if Bug is hungry and there is food source within sightRange.
-			Plant p = this.getBestPlant(plantList); // p is destination Plant
-			if (bugOnPlant(p) && hunger < 90) {
-				this.hunger += 5;
-				p.eatPlant(plantList);
-			}
-			else {
-				Double xDest = p.getX();
-				Double yDest = p.getY();
-				// if statements to confirm dx and dy are in correct direction
-				// updates direction if wrong
-				if ((this.x > xDest && dx > 0) || (this.x < xDest && dx < 0)) dx = -dx;
-				if ((this.y > yDest && dy > 0) || (this.y < yDest && dy < 0)) dy = -dy;
-				
-				//get final direction
-				double newX = this.x += dx;
-				double newY = this.y += dy;
-				//only update x and y is bug not already on Plant
-				if (newX - xDest > 20) this.x = newX;
-				if (newY - yDest > 20) this.y = newY;
-			}
-		}
-		else { // if not hungry move same direction until interrupted
-			if (this.x < bugImageSize || this.x + bugImageSize > width) dx = -dx;
-			if (this.y <= bugImageSize || this.y + bugImageSize > height) dy = -dy;
-			
-			//get final direction
-			double newX = this.x += dx;
-			double newY = this.y += dy;
-			//check that there is no bug already in target location
-			this.x = newX;
-			this.y = newY;
-		}
-	}
-
-	private boolean bugOnPlant(Plant p) {
-		if (Math.abs(this.x - p.getX()) < 30 && Math.abs(this.y - p.getY()) < 30) return true;
-		return false;
-	}
-
-	// runs for each on plantList returns true if a plant is detected in range
-	private boolean foodNear(List<Plant> plantList) {
-		for (Plant p : plantList) {
-			//check if plant is within a bugs sightRange
-			if (this.x - p.getX() < sightRange && this.x - p.getX() > -sightRange && 
-					this.y - p.getY() < sightRange && this.y - p.getY() > -sightRange) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	// decide which Plant is closest to Bugs current x and y coordinates
-	private Plant getBestPlant(List<Plant> plantList) {
-		Plant bestPlant = null;
-		for (Plant p : plantList) {
-			if (this.plantInRange(p) && p.getSize() > 1) {
-				if (bestPlant == null) bestPlant = p;
-				// get difference for each coordinate to compare
-				double xdiff = this.x - p.getX();
-				if (xdiff < 0) xdiff = -xdiff; // convert to positive number if it was negative
-				double ydiff = this.y - p.getY();
-				if (ydiff < 0) ydiff = -ydiff; // convert to positive number if it was negative
-				// repeat for current bestPlant
-				double BPxdiff = this.x - bestPlant.getX();
-				if (BPxdiff < 0) BPxdiff = -BPxdiff; // convert to positive number if it was negative
-				double BPydiff = this.y - bestPlant.getY();
-				if (BPydiff < 0) BPydiff = -BPydiff; // convert to positive number if it was negative
-				// decide which is overall closer
-				if((xdiff+ydiff) < (BPxdiff+BPydiff)) bestPlant = p;
-			}
-		}
-		return bestPlant;
-	}
-	
-	private boolean plantInRange(Plant p) {
-		//check if plant is within a bugs sightRange
-		if (this.x - p.getX() < sightRange && this.x - p.getX() > -sightRange && 
-				this.y - p.getY() < sightRange && this.y - p.getY() > -sightRange) {
-			return true;
-		}
-	return false;
+		/* This method requires List of Bugs and List of Plants from World. 
+		 * and width and height of World.
+		 * Derived classes must override this method.*/
 	}
 
 	public ImageView getBugImage() {
@@ -177,6 +109,28 @@ public class Bug {
 	
 	public double getHunger() {
 		return hunger;
+	}
+	
+	public void setHunger(double hunger) {
+		this.hunger = hunger;
+	}
+
+
+	public double getBugImageSize() {
+		return bugImageSize;
+	}
+	
+	public int getAge() {
+		return age;
+	}
+	
+	public void ageUp() {
+		age += 1;
+	}
+
+
+	public void setIsPrey(Boolean prey) {
+		// for butterfly and caterpillar
 	}
 	
 }
